@@ -9,6 +9,6 @@ public class ReqInterceptor implements RequestInterceptor {
     @Override
     public boolean interceptRequest(Request request, Response response) throws Exception {
         System.out.println(request.getUri());
-        return false;
+        return true;
     }
 }

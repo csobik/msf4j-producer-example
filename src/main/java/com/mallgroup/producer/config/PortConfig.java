@@ -10,7 +10,7 @@ public class PortConfig {
 
     @Bean
     public HTTPTransportConfig http() {
-        return new HTTPTransportConfig(9090);
+        return new HTTPTransportConfig(8080);
     }
 
     @Bean
