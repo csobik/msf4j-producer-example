@@ -6,9 +6,11 @@ buildscript {
 
     dependencies {
         classpath "com.netflix.nebula:gradle-ospackage-plugin:4.6.0"
+        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.1'
     }
 }
 
+apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'nebula.ospackage'
@@ -21,14 +23,14 @@ description = """"""
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-jar {
-    enabled = true
-    baseName = 'producer-example'
-    version = version
+shadowJar {
+    manifest {
+        attributes 'Main-Class': 'com.mallgroup.producer.Application'
+    }
 }
 
 task stage() {
-    dependsOn clean, jar
+    dependsOn clean, shadowJar
 }
 
 tasks.withType(JavaCompile) {
