@@ -1,0 +1,108 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+
+    dependencies {
+        classpath "com.netflix.nebula:gradle-ospackage-plugin:4.6.0"
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'nebula.ospackage'
+
+group = 'com.mallgroup.producer'
+version = '0.0.1-SNAPSHOT'
+
+description = """"""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+jar {
+    baseName = 'producer-example'
+    version = version
+}
+
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://maven.wso2.org/nexus/content/repositories/wso2-public/" }
+    maven { url "https://maven.wso2.org/nexus/content/repositories/releases" }
+}
+
+dependencies {
+    compile group: 'org.wso2.msf4j', name: 'msf4j-spring', version:'2.6.4'
+    compile group: 'org.wso2.msf4j', name: 'msf4j-mustache-template', version:'2.6.4'
+    compile group: 'org.slf4j', name: 'slf4j-api', version:'1.7.21'
+    compile group: 'ch.qos.logback', name: 'logback-classic', version:'1.1.7'
+    compile group: 'ch.qos.logback', name: 'logback-core', version:'1.1.7'
+    compile group: 'org.slf4j', name: 'jcl-over-slf4j', version:'1.7.21'
+    compile group: 'javax.annotation', name: 'javax.annotation-api', version: '1.3.2'
+
+    testCompile group: 'junit', name: 'junit', version:'4.12'
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version:'5.2.0'
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version:'5.2.0'
+    testCompile group: 'org.hamcrest', name: 'hamcrest-core', version:'1.3'
+    testCompile group: 'org.hamcrest', name: 'hamcrest-library', version:'1.3'
+    testCompile group: 'org.hamcrest', name: 'hamcrest-all', version:'1.3'
+    testCompile group: 'org.mockito', name: 'mockito-core', version:'2.21.0'
+    testCompile group: 'org.apache.maven.surefire', name: 'surefire-logger-api', version:'2.21.0'
+}
+
+ospackage {
+    packageName = 'producer-example'
+    version = "${project.version}"
+    //release = "${project.release}"
+    os = LINUX
+    type = BINARY
+
+//    preInstall file("$rootProject.rootDir/config/install/scripts/preInstall.sh")
+//    postInstall file("$rootProject.rootDir/config/install/scripts/postInstall.sh")
+//    preUninstall file("$rootProject.rootDir/config/install/scripts/preUninstall.sh")
+//    postUninstall file("$rootProject.rootDir/config/install/scripts/postUninstall.sh")
+
+    into "/opt/local/producer-example"
+    user "producer-example"
+    permissionGroup "producer-example"
+
+    // Copy the actual .jar file
+    from("build/libs/application-executable.jar") {
+        // Strip the "-executable" from the jar filename
+        rename { String fileName ->
+            fileName.replace("-executable", "")
+        }
+        fileMode 0500
+        into "bin"
+    }
+
+    // Copy the config files
+    from("$rootProject.rootDir/config/install/conf") {
+        fileType CONFIG | NOREPLACE
+        fileMode 0754
+        into "conf"
+    }
+}
+
+// Configure our DEB build task
+buildDeb {
+    user "transport-service"
+    permissionGroup "transport-service"
+
+    // Creates an empty log directory
+    directory("/var/log/transport-service", 0755)
+
+    // Creates a symlink to the jar file as an init.d script (this functionality is provided by Spring Boot)
+    link("/etc/init.d/transport-service", "/opt/local/transport-service/bin/application.jar")
+
+    // According to Spring Boot, the conf file needs to sit next to the jar, so we just create a symlink
+    link("/opt/local/transport-service/bin/application.conf", "/opt/local/transport-service/conf/application.conf")
+
+    // Adds the log rotation config (as a symlink) to the log rotation service
+    link("/etc/logrotate.d/transport-service", "/opt/local/transport-service/conf/log-rotate.conf")
+}
