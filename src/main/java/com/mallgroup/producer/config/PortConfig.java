@@ -10,11 +10,6 @@ public class PortConfig {
 
     @Bean
     public HTTPTransportConfig http() {
-        return new HTTPTransportConfig(8080);
-    }
-
-    @Bean
-    public CustomJWTClaimsFeature customJWTClaimsInterceptor() {
-        return new CustomJWTClaimsFeature();
+        return new HTTPTransportConfig(Integer.parseInt(System.getProperty("port")));
     }
 }
