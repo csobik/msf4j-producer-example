@@ -12,8 +12,7 @@ public class ReqInterceptor implements RequestInterceptor {
     public boolean interceptRequest(Request request, Response response) throws Exception {
 
         // print all request headers
-        Stream.of(request.getHeaders().getRequestHeaders().values().toArray())
-                .forEach(System.out::println);
+        request.getHeaders().getRequestHeaders().forEach((k, v) -> System.out.println(k + " => " + v));
 
         return true;
     }
