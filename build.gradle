@@ -22,8 +22,13 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 jar {
+    enabled = true
     baseName = 'producer-example'
     version = version
+}
+
+task stage() {
+    dependsOn clean, jar
 }
 
 tasks.withType(JavaCompile) {
