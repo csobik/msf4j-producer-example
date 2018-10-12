@@ -86,17 +86,15 @@ public class Wso2ISBearerTokenFilter implements RequestInterceptor {
     private PublicKey getPublicKey() {
         try {
             // !!! cache it
-            final KeyFactory keyFactory = KeyFactory.getInstance( "RSA" );
-            final PemReader reader = new PemReader( new FileReader( new File(ClassLoader.getSystemResource(publicKeyPath).toURI()) ) );
+            File file = new File(getClass().getClassLoader().getResource(publicKeyPath).getFile());
+
+            final KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            final PemReader reader = new PemReader( new FileReader(file) );
             final byte[] pubKey = reader.readPemObject().getContent();
-            final X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec( pubKey );
+            final X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(pubKey);
             return keyFactory.generatePublic( publicKeySpec );
         }
-        catch (URISyntaxException | IOException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (InvalidKeySpecException e) {
+        catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
             e.printStackTrace();
         }
         return null;
