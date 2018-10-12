@@ -18,6 +18,8 @@ import javax.ws.rs.core.Context;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -86,10 +88,10 @@ public class Wso2ISBearerTokenFilter implements RequestInterceptor {
     private PublicKey getPublicKey() {
         try {
             // !!! cache it
-            File file = new File(getClass().getClassLoader().getResource(publicKeyPath).getFile());
+            InputStream is = getClass().getClassLoader().getResourceAsStream(publicKeyPath);
 
             final KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            final PemReader reader = new PemReader( new FileReader(file) );
+            final PemReader reader = new PemReader( new InputStreamReader(is) );
             final byte[] pubKey = reader.readPemObject().getContent();
             final X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(pubKey);
             return keyFactory.generatePublic( publicKeySpec );
